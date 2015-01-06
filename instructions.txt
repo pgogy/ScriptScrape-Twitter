@@ -1,0 +1,20 @@
+Hello
+
+This is a demo version
+
+How to use
+
+1) Download this repository as a zip and extract it
+2) Load chrome
+3) Click on the burger menu (top right)
+4) Click on "More Tools"
+5) Click on "Extensions"
+6) Click on "Load unpacked extension"
+7) Do a search on twitter
+8) Click on "all"
+9) Click on the HumaBird Logo in the top right
+10) Click on Search Harvest
+
+Wait.....
+
+Every 100 tweets it will download a text file of the tweets and stop when twitter has no more tweets
