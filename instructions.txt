@@ -10,7 +10,7 @@ How to use
 4) Click on "More Tools"
 5) Click on "Extensions"
 6) Click on "Load unpacked extension"
-7) Do a search on twitter
+7) Do a search on twitter - make sure you're at twitter.com/search?f=realtime&q=  in the url for your search.
 8) Click on "all"
 9) Click on the HumaBird Logo in the top right
 10) Click on Search Harvest
