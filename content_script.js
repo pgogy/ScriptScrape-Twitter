@@ -5,7 +5,6 @@ chrome.extension.onMessage.addListener(
 		if(request.command=="parse"){
 	
 			scroll_document();
-			parse_document();
 			
 		}
 		
@@ -21,30 +20,27 @@ function scroll_document(){
 
 	if($(".stream-end-inner button:visible").length!=1){
 		$("html, body").animate({ scrollTop: $(document).height() }, 1);
-		console.log($(".stream-items").children().length);
-		if($(".stream-items").children().length>1000){
+		console.log($(".stream-items").children().length + " is the stream length");
+		if($(".stream-items").children().length>100){
 			parse_document();						
 		}else{
 			setTimeout(scroll_document,1000);	
 		}
 	}else{
 	
-		console.log($(".stream-items").children().length + " " + stream_length);
-	
-		if($(".stream-items").children().length == stream_length){
-			console.log($(".stream-end-inner button:visible").text() + " ENDING");
-			if(!last_parse){
-				parse_document();
-				last_parse = true;
-			}else{
-				alert("Download Complete");
-			}
-		}else{			
+		//if($(".stream-items").children().length == stream_length){
+		//	console.log($(".stream-end-inner button:visible").text() + " ENDING");
+		//	if(!last_parse){
+		//		parse_document();
+		//		//last_parse = true;
+		//	}else{
+		//		alert("Download Complete");
+		//	}
+		//}else{			
 			stream_length = $(".stream-items").children().length;
-			console.log($(".stream-end-inner button:visible").text() + " " + stream_length + " REFRESHING");
 			$("html, body").animate({ scrollTop: $(document).height() }, 1000);	
 			setTimeout(scroll_document,4500);	
-		}
+		//}
 		
 	}
 	
@@ -68,7 +64,7 @@ function GetURLParameter(sParam){
 
 function parse_document(){	
 
-	$(".stream-items .content .stream-item-footer")
+	/*$(".stream-items .content .stream-item-footer")
 		.each(
 		
 			function(index,value){
@@ -78,13 +74,15 @@ function parse_document(){
 			
 			}
 			
-		);
+		);*/
 		
 	setTimeout(get_data,2000);
 		
 }
 		
 function get_data(){
+
+	console.log("getting data");
 
 	output = "";
 
@@ -196,7 +194,7 @@ function get_data(){
 					);
 					
 					
-				output = output + name + "\t" + handle + "\t" + image + "\t" + time + "\t" + content + "\t" + retweet + "\t" + favourite + "\t" + conversation + "\t" + retweeters + "\n";
+				output = output + name + "," + handle + "," + time + "," + content.split('"').join('""').split("\t").join(" ").split("\n").join(" ").split("\r").join(" ") + "," + retweet + "," + favourite + "," + conversation + "," + retweeters + "\n";
 				
 			}						
 	
@@ -211,7 +209,7 @@ function get_data(){
 	}
 		
 	var blob = new Blob([output], {type: "text/plain;charset=utf-8"});	
-	saveAs(blob, hashtag + "-" + counter++ + "-download.txt");
+	saveAs(blob, hashtag + "-" + counter++ + "-download.csv");
 	
 	$(".stream-items li:not(:last-child)")
 		.remove();
