@@ -1,26 +1,36 @@
-chrome.extension.onMessage.addListener(
+chrome.runtime.onMessage.addListener(
 	 
 	function(request, sender, sendResponse) {	
 		
 		if(request.command=="parse"){
 	
+			tab = request.tab;
 			scroll_document();
 			
 		}
 		
-	}     
+		if(request.command=="stop"){
+	
+			console.log("stopping");
+			stop = true;
+			
+		}
+		
+	}   
 		
 );
 
+stop = false;
 stream_length = 0;
 counter = 0;
+tweets = 0;
 last_parse = false;
+tab = 0;
 
 function scroll_document(){
 
 	if($(".stream-end-inner button:visible").length!=1){
 		$("html, body").animate({ scrollTop: $(document).height() }, 1);
-		console.log($(".stream-items").children().length + " is the stream length");
 		if($(".stream-items").children().length>100){
 			parse_document();						
 		}else{
@@ -82,9 +92,7 @@ function parse_document(){
 		
 function get_data(){
 
-	console.log("getting data");
-
-	output = "";
+	output = "name,handle,conversation,time,content,replies,retweets,favourites\n";	
 
 	$(".stream-items .original-tweet .content")
 		.each(
@@ -99,7 +107,7 @@ function get_data(){
 					.children()
 					.first()
 					.next()
-					.html();
+					.text();
 					
 				handle = $(value)
 					.children()
@@ -117,48 +125,90 @@ function get_data(){
 					.first()
 					.attr("src");
 					
-				time = $(value)
+				conversation = $(value)
 					.children()
 					.first()
 					.children()
-					.last()
+					.first()
+					.next()
+					.children()
+					.first()
+					.attr("data-conversation-id");	
+			
+				url = "twitter.com" + $(value)
+					.children()
+					.first()
+					.children()
+					.first()
+					.next()
+					.children()
+					.first()
+					.attr("href");
+					
+				unix = $(value)
+					.children()
+					.first()
+					.children()
+					.first()
+					.next()
 					.children()
 					.first()
 					.children()
 					.first()
 					.attr("data-time");	
-					
+	
 				content = $(value)
 					.children()
 					.first()
 					.next()
 					.text();
+
+				replies = $(value)
+					.children()
+					.last()
+					.children()
+					.last()
+					.children()
+					.first()
+					.children()
+					.last()
+					.children()
+					.last()
+					.children()
+					.first()
+					.children()
+					.first()
+					.text();
 					
-				retweet = $(value)
+				if(replies==""){
+					replies = 0;
+				}	
+					
+				retweets = $(value)
+					.children()
+					.last()
 					.children()
 					.last()
 					.children()
 					.first()
 					.next()
 					.children()
-					.first()
-					.attr("data-tweet-stat-count");	
-					
-				conversation = $(value)
+					.last()
 					.children()
 					.last()
 					.children()
 					.first()
 					.children()
-					.length;
+					.first()
+					.text();	
 					
-				if(conversation != 1){
-					conversation = "true";
-				}else{
-					conversation = "false";
-				}
-					
-				favourite = $(value)
+				if(retweets==""){
+					retweets = 0;
+				}			
+
+				favourites = $(value)
+					.children()
+					.last()
 					.children()
 					.last()
 					.children()
@@ -166,11 +216,22 @@ function get_data(){
 					.next()
 					.next()
 					.children()
+					.last()
+					.children()
+					.last()
+					.children()
 					.first()
-					.attr("data-tweet-stat-count");	
+					.children()
+					.first()
+					.text();	
+					
+				if(favourites==""){
+					favourites = 0;
+				}	
 				
 				retweeters = "";
-	
+
+				/*
 				$(value)
 					.children()
 					.first()
@@ -192,14 +253,19 @@ function get_data(){
 							retweeters += $(value).attr("href").substring(1) + " (" + $(value).attr("original-title") + ") ";
 						}
 					);
-					
-					
-				output = output + name + "," + handle + "," + time + "," + content.split('"').join('""').split("\t").join(" ").split("\n").join(" ").split("\r").join(" ") + "," + retweet + "," + favourite + "," + conversation + "," + retweeters + "\n";
+				*/
+				
+				tweets++;
+	
+				output = output + url + "," + name + "," + handle + "," + conversation + "," + unix + "," + content.split('"').join('""').split("\t").join(" ").split("\n").join(" ").split("\r").join(" ") + "," + replies + "," + retweets + "," + favourites + "\n";
 				
 			}						
 	
 		);
 		
+		chrome.runtime.sendMessage({instruction: "update", tweets: tweets + " tweets processed"}, function(response) {
+		});		
+	
 	hashtag = GetURLParameter("q");	
 	
 	if(counter!=0){
@@ -216,9 +282,17 @@ function get_data(){
 		
 	$("html, body").animate({ scrollTop: 0 }, 1);	
 	
-	setTimeout(scroll_document,1000);
+	if(stop){
 	
-	console.log("parsing done");
+		console.log("stopping now");
 	
+		chrome.runtime.sendMessage({instruction: "update", tweets: "Harvest stopped"}, function(response) {
+		});		
+	
+	}else{
+	
+		setTimeout(scroll_document,1000);
+		
+	}
 	
 }

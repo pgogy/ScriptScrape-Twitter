@@ -1,5 +1,5 @@
 {
-    "background": { "scripts": ["background.js"] },
+    "background": { "scripts": ["background.js"], "persistent":false },
     "content_scripts": [
         {
             "matches": [
@@ -20,7 +20,7 @@
     "name": "HumaBird Project : Twitter Recorder",
     "browser_action": {
         "default_icon": "icon.png",
-        "default_title": "Google Mail",      
+        "default_title": "HumaBird Project : Twitter Recorder",      
         "default_popup": "popup.html"     
     },
     "permissions": [

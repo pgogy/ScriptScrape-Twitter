@@ -1,41 +1,33 @@
 $( document ).ready(function() {
     $("#search_harvest")
 		.on("click", function(){
-			chrome.extension.sendMessage({greeting: "GetURL"},
+			$("#data-holder")
+				.html("Starting...");
+			chrome.extension.sendMessage({instruction: "GetURL"},
 				function (response) {
-				    console.log(response);
-					console.log("***************");
 				});
 		});
-	$("#clickhere")
+		
+	$("#stop_button")
 		.on("click", function(){
-			chrome.extension.sendMessage({greeting: "GetURL2"},
+			console.log("stop");
+			$("#data-holder")
+				.html("Stopping...");
+			chrome.extension.sendMessage({instruction: "stop"},
 				function (response) {
-				    console.log(response);
-					console.log("***************");
-				});
-		});
-	$("#clickthere")
-		.on("click", function(){
-			chrome.extension.sendMessage({greeting: "GetURL3"},
-				function (response) {
-				    console.log(response);
-					console.log("***************");
-				});
-		});
-	$("#clickalso")
-		.on("click", function(){
-			chrome.extension.sendMessage({greeting: "GetURL4"},
-				function (response) {
-				    console.log(response);
-					console.log("***************");
 				});
 		});
 });
 
 chrome.extension.onMessage.addListener( 
 	function(request,sender,sendResponse){
-		if(request.command!=""){
+	
+		console.log("pop up");
+		console.log(request);
+	
+		if(request.instruction=="update"){
+			$("#data-holder")
+				.html(request.tweets);
 		}
 	}
 );

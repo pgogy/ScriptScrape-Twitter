@@ -1,15 +1,15 @@
 chrome.extension.onMessage.addListener( 
+
 	function(request,sender,sendResponse){
 	
-		if( request.greeting === "GetURL" ){
+		console.log(request);
 	
-			var tabURL = "Not set yet";
-			
+		if( request.instruction === "GetURL" ){
+	
 			chrome.tabs.getSelected(null, function(tab) {
 
-				chrome.tabs.sendMessage(tab.id, {command: "parse"}, function(response) {
+				chrome.tabs.sendMessage(tab.id, {command: "parse", tab: tab.id}, function(response) {
 
-					console.log("here i wait " + response);
 					chrome.extension.sendMessage({command: response},
 						function (response) {
 							
@@ -19,58 +19,54 @@ chrome.extension.onMessage.addListener(
 		
 			});
 			
-									     
 		}
-		if( request.greeting === "GetURL2" ){
 		
-			console.log("yo yo yo yo yo 2");
+		if( request.instruction === "stop" ){
+		
+			console.log("stop");
 	
-			var tabURL = "Not set yet";
-			
 			chrome.tabs.getSelected(null, function(tab) {
 
-				chrome.tabs.sendMessage(tab.id, {command: "parse"}, function(response) {
+				chrome.tabs.sendMessage(tab.id, {command: "stop", tab: tab.id}, function(response) {
 
-					sendResponse(response);  
+					chrome.extension.sendMessage({command: response},
+						function (response) {
+							
+						}); 
 
 				});
 		
 			});
-			      
-		}
-		if( request.greeting === "GetURL3" ){
-		
-			console.log("yo yo yo yo yo 3");
-	
-			var tabURL = "Not set yet";
 			
-			chrome.tabs.getSelected(null, function(tab) {
-
-				chrome.tabs.sendMessage(tab.id, {command: "parse"}, function(response) {
-
-					sendResponse(response);  
-
-				});
-		
-			});
-			       
 		}
-		if( request.greeting === "GetURL4" ){
-		
-			console.log("yo yo yo yo yo 4");
-	
-			var tabURL = "Not set yet";
-			
-			chrome.tabs.getSelected(null, function(tab) {
 
-				chrome.tabs.sendMessage(tab.id, {command: "parse"}, function(response) {
-
-					sendResponse(response);  
-
-				});
-		
-			});
-			     
-		}
 	}
-);    
+);   
+
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+  
+    if( request.instruction === "refresh" ){
+	
+			chrome.tabs.getSelected(null, function(tab) {
+
+				chrome.tabs.sendMessage(tab.id, {command: "update", updateText: request.tweets}, function(response) {
+
+					chrome.extension.sendMessage({command: response},
+						function (response) {
+							
+						}); 
+
+				});
+		
+			});
+			
+		}
+  
+    console.log("background listener");
+	console.log(sender.tab ?
+                "from a content script:" + sender.tab.url :
+                "from the extension");
+    if (request.greeting == "hello")
+      sendResponse({farewell: "goodbye"});
+  }); 
