@@ -23,8 +23,6 @@ chrome.extension.onMessage.addListener(
 		
 		if( request.instruction === "stop" ){
 		
-			console.log("stop");
-	
 			chrome.tabs.getSelected(null, function(tab) {
 
 				chrome.tabs.sendMessage(tab.id, {command: "stop", tab: tab.id}, function(response) {
@@ -46,7 +44,7 @@ chrome.extension.onMessage.addListener(
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
   
-    if( request.instruction === "refresh" ){
+    if(request.instruction === "refresh"){
 	
 			chrome.tabs.getSelected(null, function(tab) {
 
@@ -61,12 +59,40 @@ chrome.runtime.onMessage.addListener(
 		
 			});
 			
-		}
+	}
+	
+	if(request.instruction === "date"){
+	
+			chrome.tabs.getSelected(null, function(tab) {
+
+				chrome.tabs.sendMessage(tab.id, {command: "date", date: request.date}, function(response) {
+
+					chrome.extension.sendMessage({command: response},
+						function (response) {
+							
+						}); 
+
+				});
+		
+			});
+			
+	}
+	
+	if(request.instruction === "status"){
+	
+			chrome.tabs.getSelected(null, function(tab) {
+
+				chrome.tabs.sendMessage(tab.id, {command: "status", message: request.message}, function(response) {
+
+					chrome.extension.sendMessage({command: response},
+						function (response) {
+							
+						}); 
+
+				});
+		
+			});
+			
+	}
   
-    console.log("background listener");
-	console.log(sender.tab ?
-                "from a content script:" + sender.tab.url :
-                "from the extension");
-    if (request.greeting == "hello")
-      sendResponse({farewell: "goodbye"});
   }); 

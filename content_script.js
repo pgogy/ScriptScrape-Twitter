@@ -29,28 +29,22 @@ tab = 0;
 
 function scroll_document(){
 
-	if($(".stream-end-inner button:visible").length!=1){
+
+	if($(".back-to-top:visible").length!=1){
 		$("html, body").animate({ scrollTop: $(document).height() }, 1);
-		if($(".stream-items").children().length>100){
+		if($(".stream-items").children().length>1){
 			parse_document();						
 		}else{
+			chrome.runtime.sendMessage({instruction: "status", message: "Scrolling..."}, function(response) {
+				});
 			setTimeout(scroll_document,1000);	
 		}
 	}else{
-	
-		//if($(".stream-items").children().length == stream_length){
-		//	console.log($(".stream-end-inner button:visible").text() + " ENDING");
-		//	if(!last_parse){
-		//		parse_document();
-		//		//last_parse = true;
-		//	}else{
-		//		alert("Download Complete");
-		//	}
-		//}else{			
-			stream_length = $(".stream-items").children().length;
-			$("html, body").animate({ scrollTop: $(document).height() }, 1000);	
-			setTimeout(scroll_document,4500);	
-		//}
+		
+		chrome.runtime.sendMessage({instruction: "status", message: "Out of tweets..."}, function(response) {
+				});
+		stop = true;
+		parse_document();
 		
 	}
 	
@@ -91,6 +85,11 @@ function parse_document(){
 }
 		
 function get_data(){
+
+	console.log("getting data");
+
+	chrome.runtime.sendMessage({instruction: "status", message: "Processing data..."}, function(response) {
+		});
 
 	output = "name,handle,conversation,time,content,replies,retweets,favourites\n";	
 
@@ -162,6 +161,13 @@ function get_data(){
 					.first()
 					.next()
 					.text();
+					
+				if($(value).children().first().next().hasClass("u-hiddenVisually")){
+
+					content = $(value).children().first().next().next().text();
+					content = content + " QUOTE TWEET " +  $(value).children().last().prev().children().last().children().last().children().first().children().first().text();
+
+				}	
 
 				replies = $(value)
 					.children()
@@ -263,6 +269,9 @@ function get_data(){
 	
 		);
 		
+		chrome.runtime.sendMessage({instruction: "date", date: unix}, function(response) {
+		});
+		
 		chrome.runtime.sendMessage({instruction: "update", tweets: tweets + " tweets processed"}, function(response) {
 		});		
 	
@@ -283,10 +292,10 @@ function get_data(){
 	$("html, body").animate({ scrollTop: 0 }, 1);	
 	
 	if(stop){
-	
-		console.log("stopping now");
-	
+		console.log("stopping");
 		chrome.runtime.sendMessage({instruction: "update", tweets: "Harvest stopped"}, function(response) {
+		});		
+		chrome.runtime.sendMessage({instruction: "status", message: "Completed"}, function(response) {
 		});		
 	
 	}else{
