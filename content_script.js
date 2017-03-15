@@ -32,10 +32,10 @@ function scroll_document(){
 
 	if($(".back-to-top:visible").length!=1){
 		$("html, body").animate({ scrollTop: $(document).height() }, 1);
-		if($(".stream-items").children().length>1){
+		if($(".stream-items").children().length>100){
 			parse_document();						
 		}else{
-			chrome.runtime.sendMessage({instruction: "status", message: "Scrolling..."}, function(response) {
+			chrome.runtime.sendMessage({instruction: "status", message: "Scrolling... " + $(".stream-items").children().length + " tweets available. " + 100 + " needed to process."}, function(response) {
 				});
 			setTimeout(scroll_document,1000);	
 		}
