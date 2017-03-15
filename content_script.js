@@ -31,6 +31,9 @@ scroll_try = 0;
 function scroll_document(){
 
 
+	console.log("DOCUMENT HEIGHT IS " + $(document).height());
+	
+
 	if($(".back-to-top:visible").length!=1){
 		$("html, body").animate({ scrollTop: $(document).height() }, 1);
 		if($(".stream-items").children().length>100){
