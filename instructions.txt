@@ -4,17 +4,16 @@ This is a demo version
 
 How to use
 
-1) Download this repository as a zip and extract it
-2) Load chrome
-3) Click on the burger menu (top right)
-4) Click on "More Tools"
-5) Click on "Extensions"
-6) Click on "Load unpacked extension"
-7) Do a search on twitter - make sure you're at twitter.com/search?f=realtime&q=  in the url for your search.
-8) Click on "all"
-9) Click on the HumaBird Logo in the top right
-10) Click on Search Harvest
-
-Wait.....
-
-Every 100 tweets it will download a text file of the tweets and stop when twitter has no more tweets
+1) Download this repository as a zip and extract / open the zip file to any location and rememeber it
+2) Run chrome
+3) Click on the three dots menu (in the top right)
+4) Click on "More Tools" on the menu
+5) Click on "Extensions" on the side menu that appears. A new page will load
+6) Click on "Load unpacked extension". Move to the location from stage 1 and open that folder
+7) Do a search on twitter.
+8) Click on "latest" 
+9) Click on the HumaBird Logo in the top right. A pop up menu will appear.
+10) Click on Search Harvest on the menu
+11) The menu will update to show you - the number of tweets processed, the date reached and the current status
+12) The plugin should stop when no more tweets are available
+13) You can stop the plugin by clicking stop
