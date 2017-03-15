@@ -26,6 +26,7 @@ counter = 0;
 tweets = 0;
 last_parse = false;
 tab = 0;
+scroll_try = 0;
 
 function scroll_document(){
 
@@ -33,9 +34,12 @@ function scroll_document(){
 	if($(".back-to-top:visible").length!=1){
 		$("html, body").animate({ scrollTop: $(document).height() }, 1);
 		if($(".stream-items").children().length>100){
+			scroll_try = 0;
 			parse_document();						
 		}else{
-			chrome.runtime.sendMessage({instruction: "status", message: "Scrolling... " + $(".stream-items").children().length + " tweets available. " + 100 + " needed to process."}, function(response) {
+			console.log("scroll try");
+			scroll_try++;
+			chrome.runtime.sendMessage({instruction: "status", message: "Scrolling... " + $(".stream-items").children().length + " tweets available. " + 100 + " needed to process. Scrollling attempt : " + scroll_try}, function(response) {
 				});
 			setTimeout(scroll_document,1000);	
 		}
