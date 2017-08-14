@@ -11,7 +11,6 @@ chrome.runtime.onMessage.addListener(
 		
 		if(request.command=="stop"){
 	
-			console.log("stopping");
 			stop = true;
 			
 		}
@@ -30,25 +29,66 @@ scroll_try = 0;
 
 function scroll_document(){
 
-	if($(".back-to-top:visible").length!=1){
-		$("html, body").animate({ scrollTop: 0 }, 1);
-		$("html, body").animate({ scrollTop: $(document).height() }, 1);
-		if($(".stream-items").children().length>100){
-			scroll_try = 0;
-			parse_document();						
+	if(!stop){
+
+		console.log("document " + $(document).height());
+
+		if($(".back-to-top:visible").length!=1){
+			$("html, body").animate({ scrollTop: 0 }, 1);
+			$("html, body").animate({ scrollTop: $(document).height() }, 1);
+			if($(".stream-items").children().length>100){
+				scroll_try = 0;
+				
+				parse_document();						
+			}else{
+				scroll_try++;
+				chrome.runtime.sendMessage({instruction: "status", message: "Scrolling... " + $(".stream-items").children().length + " tweets available. " + 100 + " needed to process. Scrollling attempt : " + scroll_try}, function(response) {
+					});
+				setTimeout(scroll_document,1000);	
+			}
+			
 		}else{
-			console.log("scroll try");
-			scroll_try++;
-			chrome.runtime.sendMessage({instruction: "status", message: "Scrolling... " + $(".stream-items").children().length + " tweets available. " + 100 + " needed to process. Scrollling attempt : " + scroll_try}, function(response) {
-				});
-			setTimeout(scroll_document,1000);	
+			
+			if($(".stream-items").children().length<100){
+				
+				$("html, body").animate({ scrollTop: 0 }, 1);
+				$("html, body").animate({ scrollTop: $(document).height() }, 1);
+				scroll_try++;
+			
+				chrome.runtime.sendMessage({instruction: "status", message: "Scrolling... " + $(".stream-items").children().length + " tweets available. " + 100 + " needed to process. Scrollling attempt : " + scroll_try}, function(response) {
+					});
+				setTimeout(scroll_document,1000);
+			
+			}else{
+			
+				if(scroll_try>20){
+			
+					chrome.runtime.sendMessage({instruction: "status", message: "Out of tweets..."}, function(response) {
+					});
+					stop = true;
+			
+					parse_document();
+				
+				}else{
+				
+					$("html, body").animate({ scrollTop: 0 }, 1);
+					$("html, body").animate({ scrollTop: $(document).height() }, 1);
+					
+					scroll_try++;
+					chrome.runtime.sendMessage({instruction: "status", message: "Scrolling... " + $(".stream-items").children().length + " tweets available. " + 100 + " needed to process. Scrollling attempt : " + scroll_try}, function(response) {
+					});
+					setTimeout(scroll_document,1000);
+				
+				}
+				
+			}
+			
 		}
-	}else{
 		
-		chrome.runtime.sendMessage({instruction: "status", message: "Out of tweets..."}, function(response) {
-				});
-		stop = true;
-		parse_document();
+	}else{
+	
+		chrome.runtime.sendMessage({instruction: "status", message: "Stopped"}, function(response) {
+					});
 		
 	}
 	
@@ -71,26 +111,12 @@ function GetURLParameter(sParam){
 }
 
 function parse_document(){	
-
-	/*$(".stream-items .content .stream-item-footer")
-		.each(
-		
-			function(index,value){
-			
-				//$(value)
-				//	.trigger("click");
-			
-			}
-			
-		);*/
 		
 	setTimeout(get_data,2000);
 		
 }
 		
 function get_data(){
-
-	console.log("getting data");
 
 	chrome.runtime.sendMessage({instruction: "status", message: "Processing data..."}, function(response) {
 		});
@@ -296,7 +322,6 @@ function get_data(){
 	$("html, body").animate({ scrollTop: 0 }, 1);	
 	
 	if(stop){
-		console.log("stopping");
 		chrome.runtime.sendMessage({instruction: "update", tweets: "Harvest stopped"}, function(response) {
 		});		
 		chrome.runtime.sendMessage({instruction: "status", message: "Completed"}, function(response) {

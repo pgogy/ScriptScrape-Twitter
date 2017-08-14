@@ -2,8 +2,6 @@ chrome.extension.onMessage.addListener(
 
 	function(request,sender,sendResponse){
 	
-		console.log(request);
-	
 		if( request.instruction === "GetURL" ){
 	
 			chrome.tabs.getSelected(null, function(tab) {
