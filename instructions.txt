@@ -4,16 +4,17 @@ This is a demo version
 
 How to use
 
-1) Download this repository as a zip and extract / open the zip file to any location and rememeber it
+1) Download this repository as a zip and extract / open the zip file to any location and rememeber where you put it
 2) Run chrome
 3) Click on the three dots menu (in the top right)
 4) Click on "More Tools" on the menu
 5) Click on "Extensions" on the side menu that appears. A new page will load
-6) Click on "Load unpacked extension". Move to the location from stage 1 and open that folder
-7) Do a search on twitter.
-8) Click on "latest" 
-9) Click on the HumaBird Logo in the top right. A pop up menu will appear.
-10) Click on Search Harvest on the menu
-11) The menu will update to show you - the number of tweets processed, the date reached and the current status
-12) The plugin should stop when no more tweets are available
-13) You can stop the plugin by clicking stop
+6) In the top right turn on "developer mode"
+7) Click on "Load unpacked". Move to the location from stage 1 and open that folder
+8) Do a search on twitter.
+9) Click on "latest"
+10) Click on the HumaBird Logo in the top right. A pop up menu will appear.
+11) Click on Search Harvest on the menu
+12) The menu will update to show you - the number of tweets processed, the date reached and the current status
+13) The plugin should stop when no more tweets are available
+14) You can stop the plugin by clicking stop
