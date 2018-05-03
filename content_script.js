@@ -368,7 +368,7 @@ function get_data(){
 				content.shift();
 				content = content.join("\n");
 
-				output = output + url + "," + name + "," + handle + "," + verified + "," + conversation + "," + unix + ",\"" + content.split('"').join("'") + "\",\"" + quote.split('"').join("'") + "\"," + replies + "," + retweets + "," + favourites + "," + twittercard + "," + mediatweet + "," + threaded + "\n";
+				output = output + url + ",\"" + name + "\"," + handle + "," + verified + "," + conversation + "," + unix + ",\"" + content.split('"').join("'") + "\",\"" + quote.split('"').join("'") + "\"," + replies + "," + retweets + "," + favourites + "," + twittercard + "," + mediatweet + "," + threaded + "\n";
 
 			}
 
@@ -403,7 +403,7 @@ function get_data(){
 		});
 
 	}else{
-		
+
 		setTimeout(scroll_document,1000);
 
 	}
