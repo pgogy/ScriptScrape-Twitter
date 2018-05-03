@@ -26,6 +26,7 @@ tweets = 0;
 last_parse = false;
 tab = 0;
 scroll_try = 0;
+last_children = 0;
 
 function scroll_document(){
 
@@ -57,13 +58,22 @@ function scroll_document(){
 
 					stop = true;
 
+					scroll_try = 0;
+
 					parse_document();
 
 				}else{
 
 					$("html, body").animate({ scrollTop: 0 }, 1);
 					$("html, body").animate({ scrollTop: $(document).height() }, 1);
-					scroll_try++;
+
+					if(last_children!=$(".stream-items").children().length){
+						scroll_try = 0;
+					}else{
+						scroll_try++;
+					}
+
+					last_children = $(".stream-items").children().length;
 
 					chrome.runtime.sendMessage({instruction: "status", message: "Scrolling... " + $(".stream-items").children().length + " tweets available. " + 100 + " needed to process. Scrollling attempt : " + scroll_try}, function(response) {
 						});
@@ -73,14 +83,16 @@ function scroll_document(){
 
 			}else{
 
-				if(scroll_try>20){
+				parse_document();
 
-					chrome.runtime.sendMessage({instruction: "status", message: "Out of tweets..."}, function(response) {
+				/*if(scroll_try>20){
+
+					/*chrome.runtime.sendMessage({instruction: "status", message: "Out of tweets..."}, function(response) {
 					});
 
 					stop = true;
 
-					parse_document();
+
 
 				}else{
 
@@ -92,7 +104,7 @@ function scroll_document(){
 					});
 					setTimeout(scroll_document,1000);
 
-				}
+				}*/
 
 			}
 
@@ -391,7 +403,7 @@ function get_data(){
 		});
 
 	}else{
-
+		
 		setTimeout(scroll_document,1000);
 
 	}
