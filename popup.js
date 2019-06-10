@@ -43,5 +43,12 @@ chrome.extension.onMessage.addListener(
 			$("#status-holder")
 				.html("Status: " + request.message);
 		}
+		if(request.instruction=="files"){
+		
+			console.log(request);
+		
+			$("#files-holder")
+				.html("Files processed: " + request.message);
+		}
 	}
 );

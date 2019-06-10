@@ -22,11 +22,14 @@ chrome.runtime.onMessage.addListener(
 stop = false;
 stream_length = 0;
 counter = 0;
+totaltweets = 0;
 tweets = 0;
 last_parse = false;
 tab = 0;
 scroll_try = 0;
 last_children = 0;
+data_try = 0;
+datastore = new Array();
 
 function scroll_document(){
 
@@ -36,9 +39,8 @@ function scroll_document(){
 
 			$("html, body").animate({ scrollTop: 0 }, 1);
 			$("html, body").animate({ scrollTop: $(document).height() }, 1);
-			if($(".stream-items").children().length>50){
+			if($(".stream-items").children().length>100){
 				scroll_try = 0;
-
 				parse_document();
 			}else{
 				scroll_try++;
@@ -49,7 +51,7 @@ function scroll_document(){
 
 		}else{
 
-			if($(".stream-items").children().length<100){
+			if($(".stream-items").children().length<1){
 
 				if(scroll_try>20){
 
@@ -146,107 +148,64 @@ function get_data(){
 	chrome.runtime.sendMessage({instruction: "status", message: "Processing data..."}, function(response) {
 		});
 
-	output = "url,name,handle,verified,conversation,time,content,quoted_url,quoted_conversation,quoted_name,quoted_handle,quote,quoted_id,replies,retweets,favourites,twittercard,media,threaded\n";
+	output = "url,name,handle,avatar_image,verified,conversation,plaindate,time,content,quoted_url,quoted_conversation,quoted_name,quoted_handle,quote,quoted_id,replies,retweets,favourites,twittercard,media,threaded\n";
+
+	favouritesdata = new Array();
+	retweetsdata = new Array();
+	repliesdata = new Array();
+
+	tweets = 0;
 
 	$(".stream-items .original-tweet .content")
 		.each(
 
-			function(index,value){
+			function(index,value){		
+							
+				tweets++;
 
 				$(value).parent().parent().attr("processedbytool","true");
 
 				name = $(value)
-					.children()
-					.first()
-					.children()
-					.first()
-					.children()
-					.first()
-					.next()
-					.children()
-					.first()
-					.text();
+							.find("strong.fullname")
+							.text();
 
-				verified = "No";
+				verified = $(value)
+							.find(".stream-item-header a.account-group span.Icon--verified");
 
-				verifiedcheck = $(value)
-					.children()
-					.first()
-					.children()
-					.first()
-					.children()
-					.first()
-					.next()
-					.children()
-					.first()
-					.next()
-					.next()
-					.text();
-
-				if(verifiedcheck!=""){
-						verfied = "Yes"
+				if(verified.length==1){
+					verified = "Yes";
+				}else{
+					verified = "No";
 				}
-
+				
 				handle = $(value)
-					.children()
-					.first()
-					.children()
-					.first()
-					.attr("href").substring(1);
+							.find(".stream-item-header a span.username b")
+							.text();
 
 				image = $(value)
-					.children()
-					.first()
-					.children()
-					.first()
-					.children()
-					.first()
-					.attr("src");
+							.find(".stream-item-header img.avatar")
+							.attr("src");
 
 				conversation = $(value)
-					.children()
-					.first()
-					.children()
-					.first()
-					.next()
-					.children()
-					.first()
-					.attr("data-conversation-id");
-
-				url = "twitter.com" + $(value)
-					.children()
-					.first()
-					.children()
-					.first()
-					.next()
-					.children()
-					.first()
-					.attr("href");
-
+									.parent()
+									.attr("data-conversation-id");
+				
+				url = $(value)
+						.find(".tweet-timestamp")
+						.attr("href");
+				
+				plaindate = $(value)
+								.find("small.time a.tweet-timestamp")
+								.attr("title");
+					
 				unix = $(value)
-					.children()
-					.first()
-					.children()
-					.first()
-					.next()
-					.children()
-					.first()
-					.children()
-					.first()
-					.attr("data-time");
-
-				contentnode = $(value)
-					.children()
-					.first()
-					.next();
-
-				if(!contentnode.hasClass("js-tweet-text-container")){
-
-					contentnode = $(contentnode).next();
-
-				}
-
-				content = $(contentnode).text();
+						.find("._timestamp")
+						.attr("data-time");
+	
+				content = ($(value)
+								.find(".js-tweet-text-container p")
+								.first()
+								.text());
 
 				quoted_url = "No";
 				quoted_conversation = "No";
@@ -254,149 +213,126 @@ function get_data(){
 				quoted_handle = "No";
 				quoted_text = "No";
 				quoted_id = "No";
+				
+				quotetweet = $(value)
+					.find(".QuoteTweet-innerContainer");
+	
+				if(quotetweet.length!=0){
 
-				if($(contentnode).next().hasClass("u-hiddenVisually")){
+					quoted_url = "https://twitter.com/" + $(value)
+									.find(".QuoteTweet-innerContainer")
+									.attr("href");
+									
+					quoted_conversation = $(value)
+											.find(".QuoteTweet-innerContainer")
+											.attr("data-conversation-id");
 
-					content = $(value).children().first().next().next().text();
+					quoted_id = $(value)
+									.find(".QuoteTweet-innerContainer")
+									.attr("data-item-id");
 
-					quoted_url = "https://twitter.com" + $(contentnode).next().next().children().first().children().first().attr("href");
-					quoted_conversation = $(contentnode).next().next().children().first().children().first().attr("data-conversation-id");
-					quoted_handle = $(contentnode).next().next().children().first().children().first().next().attr("data-screen-name");
-					quoted_name = $(contentnode).next().next().children().first().children().first().next().children().first().children().first().children().first().children().first().text();
-					quoted_text = $(contentnode).next().next().children().first().children().first().next().children().first().children().first().children().first().next().text();
-					quoted_id = quoted_url.split("/").pop();
-
+					quoted_name = $(value)
+										.find(".QuoteTweet-innerContainer .QuoteTweet-fullname")
+										.text();
+										
+					quoted_handle = $(value)
+										.find(".QuoteTweet-innerContainer .username b")
+										.text();
+										
+					quoted_text = $(value)
+										.find(".QuoteTweet-innerContainer .QuoteTweet-text")
+										.text();
+										
 				}
 
-				if($(contentnode).next().next().hasClass("QuoteTweet") && quoted_text==""){
-
-					quoted_name = $(contentnode).next().next().children().first().children().first().next().children().first().children().first().next().children().first().children().first().text();
-					quoted_text = $(contentnode).next().next().children().first().children().first().next().children().first().children().first().next().children().first().next().text();
-
-					content = $(value).children().first().next().next().text();
-
-				}
-
-				replies = $(value)
-					.children()
-					.first()
-					.next()
-					.next()
-					.next()
-					.children()
-					.last()
-					.children()
-					.first()
-					.children()
-					.first()
-					.children()
-					.last()
-					.children()
-					.first()
-			   	.text()
-
-				if(replies==""){
-					replies = 0;
-				}
-
-				retweets = $(value)
-					.children()
-					.first()
-					.next()
-					.next()
-					.next()
-					.children()
-					.last()
-					.children()
-					.first()
-					.next()
-					.children()
-					.first()
-					.children()
-					.last()
-					.children()
-					.first()
-			   	.text();
-
-				if(retweets==""){
-					retweets = 0;
-				}
-
-				favourites = $(value)
-					.children()
-					.first()
-					.next()
-					.next()
-					.next()
-					.children()
-					.last()
-					.children()
-					.first()
-					.next()
-					.next()
-					.children()
-					.first()
-					.children()
-					.last()
-					.children()
-					.first()
-			   	.text();
-
-				if(favourites==""){
-					favourites = 0;
-				}
-
-				media = $(value)
-					.children()
-					.first()
-					.next()
-					.next()
-					.children()
-					.first()
-					.children()
-					.first();
-
-				twittercard = "No";
-				mediatweet = "No"
-
-				if(media[0]!=undefined){
-					if($(media).attr("src")!=undefined){
-						twittercard = $(media).attr("src");
-					}else{
-						classes = $(media).attr("class");
-						if(classes!=undefined){
-							if(classes.indexOf("AdaptiveMedia-container")!=-1){
-								mediatweet = "Yes";
+				replies = 0;
+				retweets = 0;
+				favourites = 0;
+				
+				$(value)
+					.find(".stream-item-footer .ProfileTweet-action .ProfileTweet-actionCountForPresentation")
+					.each(
+						function(index,innervalue){
+							if($(innervalue).is(":visible")){
+								number = jQuery(innervalue).text().trim();
+								if(index==0){
+									replies = number;
+								}else if(index==1){
+									retweets = number;
+								}else if(index==2){
+									retweets = number;
+								}else if(index==3){
+									favourites = number;
+								}else if(index==4){
+									favourites = number;
+								}
+								number = "";
 							}
 						}
-					}
-				}
+					);
 
+				media = $(value)
+							.find(".AdaptiveMedia-container img");
+				
+				mediatweet = "";
+			
+				if(media.length != 0){	
+				
+					$(media)
+						.each(
+							function(index,value){
+								mediatweet = mediatweet + " " + $(value).attr("src");
+							}
+						);
+				}else{
+				
+					media = $(value)
+							.find(".AdaptiveMediaOuterContainer video");
+		
+					$(media)
+						.each(
+							function(index,innervalue){							
+								mediatweet = $(innervalue).attr("src");
+							}
+						);		
+						
+				
+				}
+				
+				if(mediatweet==""){
+					mediatweet="No";
+				}
+				
+				twittercard = $(value)
+							.find(".card2")
+							.children()
+							.first()
+							.attr("data-card-url");
+				
+				if(twittercard==undefined){
+					twittercard="No";
+				}
+				
 				threaded = "No";
 
 				thread = $(value)
-					.children()
-					.last()
-					.attr("class");
-
-				if(thread!=undefined){
-					if(thread.indexOf("-thread-")!=-1){
-							threaded = "Yes";
-					}
+							.find(".self-thread-tweet-cta");
+				
+				threaded = "No";
+				
+				if(thread.length==1){
+					threaded = "Yes";
 				}
-				tweets++;
-
-				content = content.split("\n");
-				content.shift();
-				content = content.join("\n");
-
+				
 				output =
 					output
-					+ url
+					+ "https://twitter.com" + url
 					+ ",\"" + name + "\","
 					+ handle + ","
+					+ image + ","
 					+ verified + ","
-					+ conversation + ","
+					+ conversation + ",\""
+					+ plaindate + "\","
 					+ unix + ",\""
 					+ content.split('"').join("'") + "\","
 					+ quoted_url + ","
@@ -410,18 +346,21 @@ function get_data(){
 					+ favourites + ","
 					+ twittercard + ","
 					+ mediatweet + ","
-					+ threaded + "\n";
+					+ threaded + "\n";				
 
 			}
 
-		);
+		);	
+		
+	chrome.runtime.sendMessage({instruction: "date", date: unix}, function(response) {
+		});	
 
-		chrome.runtime.sendMessage({instruction: "date", date: unix}, function(response) {
+		
+	totaltweets += tweets;
+
+	chrome.runtime.sendMessage({instruction: "update", tweets: totaltweets + " tweets processed"}, function(response) {
 		});
-
-		chrome.runtime.sendMessage({instruction: "update", tweets: tweets + " tweets processed"}, function(response) {
-	 	});
-
+	
 	hashtag = GetURLParameter("q");
 
 	if(counter!=0){
@@ -433,15 +372,16 @@ function get_data(){
 	var blob = new Blob([output], {type: "text/plain;charset=utf-8"});
 	saveAs(blob, hashtag + "-" + counter++ + "-download.csv");
 
+	chrome.runtime.sendMessage({instruction: "files", message: counter}, function(response) {
+		});
+
 	$(".stream-items li[processedbytool=true]")
 		.each(
 			function(index,value){
 				$(value).remove();
 			}
 		)
-
-
-
+		
 	$("html, body").animate({ scrollTop: 0 }, 1);
 
 	if(stop){
@@ -455,5 +395,5 @@ function get_data(){
 		setTimeout(scroll_document,1000);
 
 	}
-
+	
 }
