@@ -1,6 +1,6 @@
 Hello
 
-This is a demo version
+This is a demo version, it only works on what is now "old" twitter, i'll update at some point
 
 How to use
 
